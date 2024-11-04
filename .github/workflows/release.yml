@@ -1,4 +1,5 @@
-name: release
+name: Release Charts
+
 on:
   push:
     branches:
@@ -8,15 +9,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Deploy to EKS
-        run: |
-          echo ${GITHUB_REF#refs/tags/}
-
-      - name: Publish Helm charts
-        uses: stefanprodan/helm-gh-pages@master
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          app_version: 1.16.0
-          chart_version: 1.0.15
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.7.0
+
+      # See https://github.com/helm/chart-releaser
+      # See https://github.com/helm/chart-releaser-action
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
