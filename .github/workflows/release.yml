@@ -1,0 +1,21 @@
+name: release
+on:
+  push:
+    tags: '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Deploy to EKS
+        run: |
+          echo ${GITHUB_REF#refs/tags/}
+
+      - name: Publish Helm charts
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          app_version: 1.16.0
+          chart_version: 1.0.15
